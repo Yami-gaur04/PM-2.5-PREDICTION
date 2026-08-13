@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirWatch India — Nationwide PM2.5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="particles-canvas"></canvas>
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand"><span class="brand-icon">◈</span> AirWatch <em>India</em></div></div>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#predict">Predict</a></li>
+      <li><a href="#map-section">Map</a></li>
+      <li><a href="#metrics">Model</a></li>
+    </ul>
+    <div class="nav-status" id="api-status"><span class="status-dot"></span><span class="status-text">Connecting</span></div></div>
+  </nav>
+
+  <header class="hero" id="hero">
+    <div class="hero-content reveal">
+      <p class="hero-badge">AOD · Weather · CPCB · XGBoost Geospatial</p>
+      <h1 class="hero-title">AirWatch India</h1>
+      <p class="hero-subtitle">Nationwide coordinate-based PM2.5 engine — any lat/lon in India</p>
+      <div class="hero-stats" id="hero-stats">
+        <div class="stat-card"><span class="stat-value">—</span><span class="stat-label">Stations</span></div>
+        <div class="stat-card"><span class="stat-value">—</span><span class="stat-label">States</span></div>
+        <div class="stat-card"><span class="stat-value">—</span><span class="stat-label">R²</span></div>
+        <div class="stat-card"><span class="stat-value">—</span><span class="stat-label">Coverage</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="predict">
+      <div class="section-header reveal"><span class="section-tag">AI</span><h2>Live Prediction</h2></div>
+      <div class="predict-grid">
+        <div class="glass-card predict-form reveal">
+          <div class="form-grid" id="predict-form">
+            <div class="input-group"><label>Latitude</label><input type="number" id="latitude" value="28.61" step="0.01" /></div>
+            <div class="input-group"><label>Longitude</label><input type="number" id="longitude" value="77.21" step="0.01" /></div>
+            <div class="input-group"><label>AOD <span id="val-aod_value" class="input-val">0.48</span></label><input type="range" id="aod_value" min="0.1" max="1.2" step="0.01" value="0.48" /></div>
+            <div class="input-group"><label>Temp °C <span id="val-temp_avg" class="input-val">28</span></label><input type="range" id="temp_avg" min="5" max="45" value="28" /></div>
+            <div class="input-group"><label>Tmax</label><input type="range" id="temp_max" min="10" max="50" value="34" /></div>
+            <div class="input-group"><label>Tmin</label><input type="range" id="temp_min" min="0" max="40" value="22" /></div>
+            <div class="input-group"><label>Rain</label><input type="range" id="precipitation" min="0" max="50" value="0" /></div>
+            <div class="input-group"><label>Season</label><select id="season"><option value="2" selected>Monsoon</option><option value="0">Winter</option><option value="1">Summer</option><option value="3">Post-Monsoon</option></select></div>
+          </div>
+        </div>
+        <div class="glass-card predict-result reveal">
+          <div id="predict-loading" class="result-loading"><div class="spinner"></div>
+          <p class="result-label">PM2.5</p>
+          <p class="result-pm25" id="result-pm25">—</p>
+          <p class="result-aqi" id="result-aqi">—</p>
+          <p id="result-source">—</p>
+          <p id="result-timestamp"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="map-section">
+      <div class="section-header reveal"><h2>India Map</h2><p id="map-click-status">Click map to predict</p></div>
+      <div class="glass-card map-card reveal">
+        <label><input type="checkbox" id="map-toggle-grid" checked /> Grid</label>
+        <label><input type="checkbox" id="map-toggle-cities" checked /> Stations</label>
+        <select id="map-season"><option value="2">Monsoon</option><option value="0">Winter</option></select>
+        <p id="map-loading">Loading…</p>
+        <div id="india-map"></div>
+      </div>
+    </section>
+
+    <section class="section" id="trends">
+      <div class="glass-card chart-card reveal">
+        <select id="trend-city"></select>
+        <select id="trend-days"><option value="30" selected>30 days</option></select>
+        <div class="chart-wrap"><canvas id="trend-chart"></canvas></div>
+        <div id="trend-insights"></div>
+      </div>
+    </section>
+
+    <section class="section" id="metrics">
+      <div class="metrics-cards" id="metrics-cards"></div>
+      <div class="metrics-charts">
+        <div class="glass-card chart-card"><canvas id="feature-chart"></canvas></div>
+        <div class="glass-card chart-card"><canvas id="scatter-chart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="section" id="rankings">
+      <div class="glass-card"><div id="rankings-list"></div>
+    </section>
+
+    <section class="section" id="cpcb">
+      <div class="cpcb-grid" id="cpcb-grid"></div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="glass-card" style="padding:1.5rem">
+        <h2>About</h2>
+        <p>Coordinate engine: (lat, lon, datetime, AOD, weather) → PM2.5. Train on Kaggle/Colab, deploy model to backend/models/.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">AirWatch India © 2026</footer>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
