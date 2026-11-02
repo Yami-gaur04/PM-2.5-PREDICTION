@@ -88,8 +88,8 @@ python backend/preprocessing/merge_datasets.py --sample
 The platform supports multiple machine learning models:
 
 - Random Forest
-- XGBoost (default model)
-- LightGBM (optional)
+- XGBoost 
+- LightGBM 
 
 Train the model using:
 
